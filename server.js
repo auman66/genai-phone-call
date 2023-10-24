@@ -72,6 +72,7 @@ app.ws("/connection", (ws, req) => {
           .update({status: 'completed'})
           .then(call => console.log(call.to));
       }
+      // Generate goodby and set call to end after it has gone on long enough
       if (messages.length >= 12){
         console.log("Add goodbye prompt");
         hangup = true;
@@ -80,30 +81,16 @@ app.ws("/connection", (ws, req) => {
         messages.push(chatCompletion);
         ttsService.generate(chatCompletion.content);
       }
-      // End call after it has gone on long enough
-      // if (messages.length >= 6){
-      //   console.log("<><><>Ending call<><><>");
-      //   hangup = true;
-      //   messages.push({role: "user", content: "Come up with a pithy goodby message. Assume you may be cutting the user off. You can be a little rude"});
-      //   const goodbye = chat(messages);
-      //   ttsService.generate(goodbye);
-      // }
     }
   });
 
   transcriptionService.on("transcription", async (text) => {
     console.log(`Received transcription: ${text}`);
     messages.push({ role: "user", content: text });
-    // if (messages.length >= 6){
-    //   console.log("Add goodbye prompt");
-    //   hangup = true;
-    //   messages.push({role: "user", content: "Come up with a pithy goodby message. Assume you may be cutting the user off. You can be a little rude"});
-    // }
     const chatCompletion = await chat(messages);
     messages.push(chatCompletion);
     ttsService.generate(chatCompletion.content);
     console.log(`Messages Length: ${messages.length}`);
-    // End call after it has gone on long enough
     
   });
 
